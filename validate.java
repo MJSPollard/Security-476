@@ -38,18 +38,15 @@ public class validate {
         Pattern misc_re = Pattern.compile("(?<=\\=)\\d{7}");
 
         Matcher match = card_no_re.matcher(dump);
-
         while(match.find())
         {
            String data = match.group();
-        //    System.out.println(data.charAt(0));
            if(data.charAt(0) != '1' && !card_no.contains(data)){
                card_no.add(data);
            }
         }
 
         match = name_re.matcher(dump);
-
         while(match.find())
         {
             String data = match.group();
@@ -59,7 +56,6 @@ public class validate {
         }
 
         match = misc_re.matcher(dump);
-
         while(match.find())
         {
             String data = match.group();
@@ -68,10 +64,5 @@ public class validate {
             }
         }
         Collections.reverse(misc);
-
-    }
-
-    public void printRecord() {
-        
     }
 }
