@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 // run with javac CheckTrackEncryption.java && java CheckTrackEncryption
 public class CheckTrackEncryption {
+
     /**
      * Read in the File and call other functions.
      */
@@ -20,7 +21,6 @@ public class CheckTrackEncryption {
         }
         cte.printTrackRecords(cte.searchForTrackData(memDump));
     }
-
 
     /**
      * Extract Track I formatted data if there is any.
@@ -44,6 +44,7 @@ public class CheckTrackEncryption {
         }
         return Track_I_List;
     }
+
     /**
      * Print out the track I data appropriately.
      * @param records, the list of track I data.
