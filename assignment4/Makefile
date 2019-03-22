@@ -1,7 +1,7 @@
 # build and run the file
 run:
 	@gcc -o ScannerFinder ScannerFinder.c -lpcap \
-	&& ./ScannerFinder
+	&& ./ScannerFinder lbl-internal.20041004-1305.port002.dump.pcap
 
 # remove generated files
 clean:
