@@ -8,6 +8,12 @@
 #include <netinet/tcp.h>
 #include <arpa/inet.h>
 
+/* 
+ * Assignment 4 for CSCI 476, Computer Security
+ * Montana State University, Spring 2019
+ * @Authors, Michael Pollard, Austin Johnson, Matthew Sagen
+ */
+
 #define SYN 2
 #define SYNACK 12
 #define SUCCESS 0
@@ -22,11 +28,19 @@ struct ip_info {
 };
 struct ip_info *start = NULL;
 
-/* push nodes onto front on linked list */
-void push(struct ip_info** head, char* ip_in) {
-    int i; 
+/* 
+ * This function pushes nodes onto the front of the linked list.
+ */
+void push(struct ip_info** head, char* ip_in, int packetType) {
+    int i;
     struct ip_info* new_ip = (struct ip_info*)malloc(sizeof(struct ip_info));
+    /* Add struct members to Nodes */
     new_ip->ip  = malloc(strlen(ip_in));
+    if (packetType == SYN) {
+        new_ip->syn_sent++;
+    } else if (packetType == SYNACK) {
+        new_ip->syn_ack_recv++;
+    }
     new_ip->next = (*head);
     for (i = 0; i < strlen(ip_in); i++) {
         *(char *)(new_ip->ip + i) = *(char *)(ip_in + i);
@@ -34,10 +48,13 @@ void push(struct ip_info** head, char* ip_in) {
     (*head) = new_ip;
 }
 
-/* search linked list for certain nodes */
+/*
+ * This function searches the linked list for certain nodes.
+ */
 int search(struct ip_info* head, char* ip_in, int packetType) 
 {
     struct ip_info* current = head;
+    /* Loop through list and increments counts according to packetType */
     while (current != NULL) {
         if (strcmp(current->ip, ip_in) == 0) {
             if (packetType == SYN) {
@@ -52,24 +69,26 @@ int search(struct ip_info* head, char* ip_in, int packetType)
     return FAILURE; 
 }
 
+/*
+ * This function prints out the list of IP's that sent more SYN's than
+ * received SYN'ACK's.
+ */
 void printList(struct ip_info *node) {
+    printf("\nIP's SUSPECTED OF PORT SCANNING\n");
+    printf("----------------------------------------------------------------------\n");
     while (node != NULL) {
         if (node->syn_sent > node->syn_ack_recv) {
-            printf("ip = %s\n", node->ip);
-        } else {
-            if(strcmp(node->ip, "128.3.164.249") == 0) {
-                // printf("syn = %d\n", node->syn_sent);
-                // printf("synack = %d\n\n", node->syn_ack_recv);
-            }
-            // printf("syn = %d\n", node->syn_sent);
-            // printf("synack = %d\n\n", node->syn_ack_recv);
+            int dif = (node->syn_sent - node->syn_ack_recv);
+            printf("%s  --  sent %d more SYN packets than SYN-ACK packets received\n", node->ip, dif);
         }
         node = node->next; 
     }
+    printf("----------------------------------------------------------------------\n");
 }
 
 /* 
- * Callback function for pcap_loop to analyze each packet in the capture.
+ * Callback function for pcap_loop to analyze each packet in the capture and
+ * extract needed data.
  */
 void packetHandler(unsigned char* userData, const struct pcap_pkthdr* pkthdr, const unsigned char* packet) {
     const struct ether_header* ethernetHeader;
@@ -90,25 +109,14 @@ void packetHandler(unsigned char* userData, const struct pcap_pkthdr* pkthdr, co
             tcpHeader = (struct tcphdr*)(packet + sizeof(struct ether_header) + sizeof(struct ip));
             sourcePort = ntohs(tcpHeader->source);
             destPort = ntohs(tcpHeader->dest);
-
             /* check if syn packet or syn-ack packet */
             if(tcpHeader->syn && !tcpHeader->ack) {
-                printf("syn packet\n");
-                printf("src_ip = %s\n", sourceIp);
-                printf("dest_ip = %s\n", destIp);
-                printf("src_PORT = %d\n", sourcePort);
-                printf("dest_PORT = %d\n\n", destPort);
                 if(search(start, sourceIp, SYN) == FAILURE) {
-                    push(&start, sourceIp);
+                    push(&start, sourceIp, SYN);
                 }
             } else if (tcpHeader->syn && tcpHeader->ack) {
-                printf("syn-ack packet\n");
-                printf("src_ip = %s\n", sourceIp);
-                printf("dest_ip = %s\n", destIp);
-                printf("src_PORT = %d\n", sourcePort);
-                printf("dest_PORT = %d\n\n", destPort);
                 if(search(start, destIp, SYNACK) == FAILURE) {
-                    push(&start, destIp);
+                    push(&start, destIp, SYNACK);
                 }
             }
         }
@@ -119,7 +127,6 @@ void packetHandler(unsigned char* userData, const struct pcap_pkthdr* pkthdr, co
  * Main function to find possible SYN scanning attacks.
  */
 int main(int argc, char** argv) {
-
     /* Check command line arguments. */
     if (argc != 2) {
         printf("Bad command line arguments.\n");
@@ -133,7 +140,7 @@ int main(int argc, char** argv) {
         printf("pcap_open_offline() failed: %s\n", error_buffer);
         return FAILURE;
     } else {
-        printf("pcap file read in correctly.\n");
+        printf(".pcap file read in correctly.\n");
     }
 
     /* Loop through each packet in the capture file. */
