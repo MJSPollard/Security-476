@@ -75,15 +75,14 @@ int search(struct ip_info* head, char* ip_in, int packetType)
  */
 void printList(struct ip_info *node) {
     printf("\nIP's SUSPECTED OF PORT SCANNING\n");
-    printf("----------------------------------------------------------------------\n");
+    printf("----------------\n");
     while (node != NULL) {
-        if (node->syn_sent > node->syn_ack_recv) {
-            int dif = (node->syn_sent - node->syn_ack_recv);
-            printf("%s  --  sent %d more SYN packets than SYN-ACK packets received\n", node->ip, dif);
+        if (node->syn_sent > (3 * node->syn_ack_recv)) {
+            printf("%s\n", node->ip);
         }
         node = node->next; 
     }
-    printf("----------------------------------------------------------------------\n");
+    printf("----------------\n");
 }
 
 /* 
