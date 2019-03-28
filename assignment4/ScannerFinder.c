@@ -85,6 +85,20 @@ void printList(struct ip_info *node) {
     printf("----------------\n");
 }
 
+/*
+ * This functions frees all nodes in the linked list.
+ */
+int freeList(struct ip_info *node) {
+    struct ip_info* tmp;
+
+    while (node != NULL) {
+        tmp = node;
+        node = node->next;
+        free(tmp->ip);
+        free(tmp);
+    }
+}
+
 /* 
  * Callback function for pcap_loop to analyze each packet in the capture and
  * extract needed data.
@@ -150,6 +164,8 @@ int main(int argc, char** argv) {
     }
     printf("Packet analysis finished.\n");
     printList(start);
+    freeList(start);
+    pcap_close(handle);
 
     return SUCCESS;
 }
