@@ -1,0 +1,29 @@
+CSCI 476, Computer Security
+Montana State University 2019
+
+Group Members: Michael Pollard, Hugh Jackovich, Austin Johnson
+
+I)
+
+    Let P be the probability that Eve would succeed, then,
+    P = 1 - (1 - 1/(2^20))^n
+
+II)
+
+    If P = 0.5, we have,
+    0.5 = 1 - (1 - 1/(2^20))^n
+    Therefore,
+    n = ln(0.5/(1 - (1/(2^20))))
+    or,
+    n = 726817.15 (rounded)
+
+III)
+
+    Using the rand() functions in C or Java could potentially generate the same random number more than once.
+    To avoid this issue and guarantee a success within 2^20 tries, you could do as follows.
+        1. Create a list with every number from 0 to 2^20.
+        2. Use the rand() function to select an index in the list and try to use the value at that index.
+        3. If it fails, remove that value from the list and decrease the rand() range by 1.
+        4. Repeat until the list size is 0 or the value was a success.
+
+IV)
