@@ -27,3 +27,7 @@ III)
         4. Repeat until the list size is 0 or the value was a success.
 
 IV)
+
+    With this method we have the following equation,
+    Probability = (1 - m/(2^20))^m
+    The smallest whole number m to get at least 50% probability is m = 853.
